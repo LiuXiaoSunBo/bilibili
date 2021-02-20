@@ -1,7 +1,4 @@
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
@@ -14,9 +11,11 @@ import java.util.concurrent.TimeUnit;
 public class BiliBili {
     public static void open(String cookie,String data,String url) throws InterruptedException {
         ChromeOptions chromeOptions=new ChromeOptions();
+        chromeOptions.addArguments("-headless");
         WebDriver driver = new ChromeDriver(chromeOptions);
         driver.get("https://www.bilibili.com/");
         setCookie(driver, cookie);
+        String js = "window.scrollBy(0, 1000)";
         driver.get(url);
         driver.manage().window().maximize();
         while (true) {
@@ -26,6 +25,8 @@ public class BiliBili {
                 String text = element.findElement(By.className("detail-link")).getText();
                 System.out.println(text);
                 if (text.equals("刚刚")||(getNumber(text)<30&& text.contains("秒"))){
+                    JavascriptExecutor jS = (JavascriptExecutor)driver;
+                    jS.executeScript(js);
                     element.findElements(By.className("text-offset")).get(1).click();
                     TimeUnit.SECONDS.sleep(2);
                     WebElement element1 = element.findElement(By.tagName("textarea"));
