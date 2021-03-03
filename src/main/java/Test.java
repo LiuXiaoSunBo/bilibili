@@ -22,7 +22,6 @@ public class Test {
         FlowLayout fl = new FlowLayout(FlowLayout.CENTER,10,10);
         //实例化流式布局类的对象
         frame.setLayout(fl);
-
         //实例化JLabel标签对象，该对象显示“账号”
         JLabel labname = new JLabel("用户：");
         labname.setFont(new Font("宋体",Font.PLAIN,14));
@@ -83,11 +82,33 @@ public class Test {
         button1.setFont(new Font("宋体",Font.PLAIN,14));
         //设置按键大小
         button1.setSize(dim2);
+
+        //实例化JButton组件
+        JButton button2 = new JButton();
+        //设置按键的显示内容
+        Dimension dim3 = new Dimension(100,30);
+        button2.setText("退出");
+        button2.setFont(new Font("宋体",Font.PLAIN,14));
+        //设置按键大小
+        button2.setSize(dim3);
         frame.add(button1);
+        frame.add(button2);
 
+        button2.addActionListener(new exit(frame));
         frame.setVisible(true);//窗体可见，一定要放在所有组件加入窗体后
-        button1.addActionListener(new go(frame,text_name,textField,text_password,driverText));
+        button1.addActionListener(new go(frame,text_name,textField,text_password,driverText,button1));
 
+    }
+    class exit implements ActionListener{
+        private javax.swing.JFrame exit;
+        public exit(javax.swing.JFrame exit){
+            this.exit=exit;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            BiliBili.thread.interrupt();
+            exit.dispose();
+        }
     }
     class go implements ActionListener {
         private javax.swing.JTextField cookie;
@@ -95,26 +116,27 @@ public class Test {
         private javax.swing.JTextField data;
         private javax.swing.JTextField driver;
         private javax.swing.JFrame open;
-        public go(javax.swing.JFrame open,javax.swing.JTextField cookie,javax.swing.JTextField url,javax.swing.JTextField data,javax.swing.JTextField driver)
+        private javax.swing.JButton btn;
+        public go(javax.swing.JFrame open,javax.swing.JTextField cookie,javax.swing.JTextField url,javax.swing.JTextField data,javax.swing.JTextField driver,JButton jButton)
         {//获取登录界面、账号密码输入框对象
             this.open=open;
             this.url=url;
             this.data=data;
             this.cookie=cookie;
             this.driver=driver;
+            this.btn = jButton;
         }
 
 
         @Override
         public void actionPerformed(ActionEvent e) {
             System.setProperty("webdriver.chrome.driver", driver.getText()+"\\chromedriver.exe");
-            this.open.setEnabled(false);
+            btn.setEnabled(false);
             try {
                 BiliBili.open(cookie.getText(),data.getText(),url.getText());
             } catch (InterruptedException ex) {
                 open.dispose();
             }
-            open.dispose();
         }
     }
 }

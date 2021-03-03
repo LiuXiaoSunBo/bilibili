@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class BiliBili {
+   public static Thread thread;
     public static void open(String cookie, String data, String url) throws InterruptedException {
         ChromeOptions chromeOptions=new ChromeOptions();
         chromeOptions.addArguments("-headless");
@@ -21,32 +22,41 @@ public class BiliBili {
         String js = "window.scrollBy(0, 300)";
         driver.get(url);
         driver.manage().window().maximize();
-        while (true) {
-            try {
-                TimeUnit.SECONDS.sleep(2);
-                WebElement element = driver.findElements(By.className("card")).get(0);
-                String text = element.findElement(By.className("detail-link")).getText();
-                System.out.println(text);
-                if (text.equals("刚刚")||(getNumber(text)<50&& text.contains("秒"))){
-                    JavascriptExecutor jS = (JavascriptExecutor)driver;
-                    jS.executeScript(js);
-                    element.findElements(By.className("text-offset")).get(1).click();
-                    TimeUnit.SECONDS.sleep(1);
-                    WebElement element1 = element.findElement(By.tagName("textarea"));
-                    System.out.println(element1);
-                    element1.clear();
-                    element1.sendKeys(data);
+         thread = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
                     TimeUnit.SECONDS.sleep(2);
-                    element.findElement(By.tagName("button")).click();
+                    WebElement element = driver.findElements(By.className("card")).get(0);
+                    String text = element.findElement(By.className("detail-link")).getText();
+                    System.out.println(text);
+                    if (text.equals("刚刚")||(getNumber(text)<50&& text.contains("秒"))){
+                        JavascriptExecutor jS = (JavascriptExecutor)driver;
+                        jS.executeScript(js);
+                        element.findElements(By.className("text-offset")).get(1).click();
+                        TimeUnit.SECONDS.sleep(1);
+                        WebElement element1 = element.findElement(By.tagName("textarea"));
+                        System.out.println(element1);
+                        element1.clear();
+                        element1.sendKeys(data);
+                        TimeUnit.SECONDS.sleep(2);
+                        element.findElement(By.tagName("button")).click();
+                    }
+                    driver.navigate().refresh();
                 }
-                driver.navigate().refresh();
-             } catch (Exception e) {
-                System.out.println("出错");
-                System.out.println(e.getMessage());
-                driver.navigate().refresh();
-                continue;
+                catch (InterruptedException e){
+                    break;
+                }
+                catch (Exception e) {
+                    System.out.println("出错");
+                    System.out.println(e.getMessage());
+                    driver.navigate().refresh();
+                    e.printStackTrace();
+                    continue;
+                }
             }
-        }
+
+        });
+        thread.start();
     }
 
     private static void setCookie(WebDriver webDriver, String cookie) {
